@@ -1,0 +1,13 @@
+{
+  "Author": "Anya Hichu",
+  "Name": "RecruitmentRefresher",
+  "Punchline": "Recruit all night!",
+  "Description": "Refresh party finder recruitment automatically",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "recruitment",
+    "party",
+    "finder",
+    "refresher"
+  ]
+}
