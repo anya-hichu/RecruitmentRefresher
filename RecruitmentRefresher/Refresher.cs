@@ -10,7 +10,7 @@ public class Refresher : IDisposable
     private IFramework Framework { get; init; }
     private RefreshCommand RefreshCommand { get; init; }
 
-    private double SecsElapsed { get; set; } = 0;
+    private double MinsElapsed { get; set; } = 0;
 
     public Refresher(Config config, IFramework framework, RefreshCommand refreshCommand)
     {
@@ -30,20 +30,19 @@ public class Refresher : IDisposable
     {
         if (Config.Enabled)
         {
-            if (SecsElapsed >= Config.RefreshRate * 60)
+            if (MinsElapsed >= Config.RefreshRate)
             {
                 RefreshCommand.Execute();
-                SecsElapsed = 0;
+                MinsElapsed = 0;
             }
             else
             {
-                SecsElapsed += Framework.UpdateDelta.TotalSeconds;
+                MinsElapsed += Framework.UpdateDelta.TotalMinutes;
             }
         } 
         else
         {
-            SecsElapsed = 0;
+            MinsElapsed = 0;
         }
-       
     }
 }

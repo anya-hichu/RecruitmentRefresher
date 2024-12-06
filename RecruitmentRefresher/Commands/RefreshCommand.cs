@@ -1,5 +1,4 @@
 using Dalamud.Game;
-using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Command;
 using Dalamud.Plugin.Services;
 using ECommons;
@@ -19,6 +18,8 @@ public unsafe class RefreshCommand : IDisposable
 
     private static readonly int MAX_RETRY = 50;
     private static readonly int RETRY_DELAY = 50; //ms
+
+    private static readonly uint RECRUITING_PARTY_MEMBER_ID = 26;
 
     private static readonly string OPEN_PARTY_FINDER_SIGNATURE = "40 53 48 83 EC 20 48 8B D9 E8 ?? ?? ?? ?? 84 C0 74 07 C6 83 ?? ?? ?? ?? ?? 48 83 C4 20 5B C3 CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC 40 53";
    
@@ -60,28 +61,32 @@ public unsafe class RefreshCommand : IDisposable
 
     public void Execute()
     {
-        if (ClientState.LocalPlayer != null || Condition[ConditionFlag.ParticipatingInCrossWorldPartyOrAlliance] || Condition[ConditionFlag.RecruitingWorldOnly])
+        if (ClientState.LocalPlayer?.OnlineStatus.ValueNullable?.RowId == RECRUITING_PARTY_MEMBER_ID)
         {
             Task.Run(() =>
             {
                 OpenPartyFinder(AgentLookingForGroup.Instance(), ClientState.LocalContentId);
-                if(!WaitFor<AddonMaster.LookingForGroupDetail>(out var groupDetail))
+                if(!TryWaitFor<AddonMaster.LookingForGroupDetail>(out var groupDetail))
                 {
                     ChatGui.PrintError("Failed to capture group detail window");
                     return;
                 }
                 groupDetail.JoinEdit();
-                if (!WaitFor<AddonMaster.LookingForGroupCondition>(out var groupCondition))
+                if (!TryWaitFor<AddonMaster.LookingForGroupCondition>(out var groupCondition))
                 {
                     ChatGui.PrintError("Failed to capture group condition window");
                     return;
                 };
-                groupCondition.Cancel();
+                if (!TryRecruit(groupCondition))
+                {
+                    ChatGui.PrintError("Failed to click on recruit button");
+                    return;
+                }
             });
         }
     }
 
-    private static bool WaitFor<T>(out T addonMaster) where T : IAddonMasterBase
+    private static bool TryWaitFor<T>(out T addonMaster) where T : IAddonMasterBase
     {
         for (var i = 0; !GenericHelpers.TryGetAddonMaster(out addonMaster) || !addonMaster.IsAddonReady; i++)
         {
@@ -91,6 +96,20 @@ public unsafe class RefreshCommand : IDisposable
                 return false;
             }
         }
+        return true;
+    }
+
+    private static bool TryRecruit(AddonMaster.LookingForGroupCondition addon)
+    {
+        for (var i = 0; !addon.RecruitButton->IsEnabled; i++)
+        {
+            Thread.Sleep(RETRY_DELAY);
+            if (i > MAX_RETRY)
+            {
+                return false;
+            }
+        }
+        addon.Recruit();
         return true;
     }
 }
