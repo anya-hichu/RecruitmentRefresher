@@ -28,11 +28,11 @@ public class Refresher : IDisposable
 
     public void OnFrameworkUpdate(IFramework _)
     {
-        if (Config.Enabled)
+        if (Config.Enabled && RefreshCommand.Executable())
         {
             if (MinsElapsed >= Config.RefreshRate)
             {
-                RefreshCommand.Execute();
+                RefreshCommand.ExecuteTask();
                 MinsElapsed = 0;
             }
             else

@@ -56,34 +56,43 @@ public unsafe class RefreshCommand : IDisposable
 
     private void OnCommand(string command, string args)
     {
-        Execute();
+        if (Executable())
+        {
+            ExecuteTask();
+        } 
+        else
+        {
+            ChatGui.PrintError("Not currently recruiting");
+        }
     }
 
-    public void Execute()
+    public bool Executable()
     {
-        if (ClientState.LocalPlayer?.OnlineStatus.ValueNullable?.RowId == RECRUITING_PARTY_MEMBER_ID)
+        return ClientState.LocalPlayer?.OnlineStatus.ValueNullable?.RowId == RECRUITING_PARTY_MEMBER_ID;
+    }
+
+    public void ExecuteTask()
+    {
+        Task.Run(() =>
         {
-            Task.Run(() =>
+            OpenPartyFinder(AgentLookingForGroup.Instance(), ClientState.LocalContentId);
+            if(!TryWaitFor<AddonMaster.LookingForGroupDetail>(out var groupDetail))
             {
-                OpenPartyFinder(AgentLookingForGroup.Instance(), ClientState.LocalContentId);
-                if(!TryWaitFor<AddonMaster.LookingForGroupDetail>(out var groupDetail))
-                {
-                    ChatGui.PrintError("Failed to capture group detail window");
-                    return;
-                }
-                groupDetail.JoinEdit();
-                if (!TryWaitFor<AddonMaster.LookingForGroupCondition>(out var groupCondition))
-                {
-                    ChatGui.PrintError("Failed to capture group condition window");
-                    return;
-                };
-                if (!TryRecruit(groupCondition))
-                {
-                    ChatGui.PrintError("Failed to click on recruit button");
-                    return;
-                }
-            });
-        }
+                ChatGui.PrintError("Failed to capture group detail window");
+                return;
+            }
+            groupDetail.JoinEdit();
+            if (!TryWaitFor<AddonMaster.LookingForGroupCondition>(out var groupCondition))
+            {
+                ChatGui.PrintError("Failed to capture group condition window");
+                return;
+            };
+            if (!TryRecruit(groupCondition))
+            {
+                ChatGui.PrintError("Failed to click on recruit button");
+                return;
+            }
+        });
     }
 
     private static bool TryWaitFor<T>(out T addonMaster) where T : IAddonMasterBase
