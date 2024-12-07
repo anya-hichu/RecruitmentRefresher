@@ -1,4 +1,5 @@
 using Dalamud.Game;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Command;
 using Dalamud.Plugin.Services;
 using ECommons;
@@ -22,7 +23,7 @@ public unsafe class RefreshCommand : IDisposable
     private static readonly uint RECRUITING_PARTY_MEMBER_ID = 26;
 
     private static readonly string OPEN_PARTY_FINDER_SIGNATURE = "40 53 48 83 EC 20 48 8B D9 E8 ?? ?? ?? ?? 84 C0 74 07 C6 83 ?? ?? ?? ?? ?? 48 83 C4 20 5B C3 CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC 40 53";
-   
+
     private delegate void OpenPartyFinderDelegate(void* agentLfg, ulong contentId);
 
     private IChatGui ChatGui { get; init; }
@@ -40,13 +41,13 @@ public unsafe class RefreshCommand : IDisposable
         Condition = condition;
         Config = config;
 
+        var openPartyFinderPtr = sigScanner.ScanText(OPEN_PARTY_FINDER_SIGNATURE);
+        OpenPartyFinder = Marshal.GetDelegateForFunctionPointer<OpenPartyFinderDelegate>(openPartyFinderPtr);
+
         commandManager.AddHandler(COMMAND_NAME, new CommandInfo(OnCommand)
         {
             HelpMessage = COMMAND_HELP_MESSAGE
         });
-
-        var openPartyFinderPtr = sigScanner.ScanText(OPEN_PARTY_FINDER_SIGNATURE);
-        OpenPartyFinder = Marshal.GetDelegateForFunctionPointer<OpenPartyFinderDelegate>(openPartyFinderPtr);
     }
 
     public void Dispose()
@@ -56,19 +57,19 @@ public unsafe class RefreshCommand : IDisposable
 
     private void OnCommand(string command, string args)
     {
-        if (Executable())
+        if (IsExecutable())
         {
             ExecuteTask();
-        } 
+        }
         else
         {
             ChatGui.PrintError("Not currently recruiting");
         }
     }
 
-    public bool Executable()
+    public bool IsExecutable()
     {
-        return ClientState.LocalPlayer?.OnlineStatus.ValueNullable?.RowId == RECRUITING_PARTY_MEMBER_ID;
+        return Condition[ConditionFlag.UsingPartyFinder];
     }
 
     public void ExecuteTask()
@@ -76,7 +77,7 @@ public unsafe class RefreshCommand : IDisposable
         Task.Run(() =>
         {
             OpenPartyFinder(AgentLookingForGroup.Instance(), ClientState.LocalContentId);
-            if(!TryWaitFor<AddonMaster.LookingForGroupDetail>(out var groupDetail))
+            if (!TryWaitFor<AddonMaster.LookingForGroupDetail>(out var groupDetail))
             {
                 ChatGui.PrintError("Failed to capture group detail window");
                 return;

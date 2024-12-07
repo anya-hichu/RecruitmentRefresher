@@ -28,7 +28,7 @@ public class Refresher : IDisposable
 
     public void OnFrameworkUpdate(IFramework _)
     {
-        if (Config.Enabled && RefreshCommand.Executable())
+        if (Config.Enabled && RefreshCommand.IsExecutable())
         {
             if (MinsElapsed >= Config.RefreshRate)
             {
@@ -39,7 +39,7 @@ public class Refresher : IDisposable
             {
                 MinsElapsed += Framework.UpdateDelta.TotalMinutes;
             }
-        } 
+        }
         else
         {
             MinsElapsed = 0;
