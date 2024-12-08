@@ -20,8 +20,6 @@ public unsafe class RefreshCommand : IDisposable
     private static readonly int MAX_RETRY = 50;
     private static readonly int RETRY_DELAY = 50; //ms
 
-    private static readonly uint RECRUITING_PARTY_MEMBER_ID = 26;
-
     private static readonly string OPEN_PARTY_FINDER_SIGNATURE = "40 53 48 83 EC 20 48 8B D9 E8 ?? ?? ?? ?? 84 C0 74 07 C6 83 ?? ?? ?? ?? ?? 48 83 C4 20 5B C3 CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC 40 53";
 
     private delegate void OpenPartyFinderDelegate(void* agentLfg, ulong contentId);
