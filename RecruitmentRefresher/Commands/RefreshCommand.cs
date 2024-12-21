@@ -4,6 +4,7 @@ using Dalamud.Game.Command;
 using Dalamud.Plugin.Services;
 using ECommons;
 using ECommons.UIHelpers.AddonMasterImplementations;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using System;
 using System.Runtime.InteropServices;
@@ -30,6 +31,7 @@ public unsafe class RefreshCommand : IDisposable
     private ICondition Condition { get; init; }
     private Config Config { get; init; }
     private OpenPartyFinderDelegate OpenPartyFinder { get; init; }
+    private AgentLookingForGroup* AgentLookingForGroupPtr { get; init; }
 
     public RefreshCommand(IChatGui chatGui, IClientState clientState, ICommandManager commandManager, ICondition condition, Config config, ISigScanner sigScanner)
     {
@@ -46,6 +48,8 @@ public unsafe class RefreshCommand : IDisposable
         {
             HelpMessage = COMMAND_HELP_MESSAGE
         });
+
+        AgentLookingForGroupPtr = AgentLookingForGroup.Instance();
     }
 
     public void Dispose()
@@ -74,22 +78,26 @@ public unsafe class RefreshCommand : IDisposable
     {
         Task.Run(() =>
         {
-            OpenPartyFinder(AgentLookingForGroup.Instance(), ClientState.LocalContentId);
+            OpenPartyFinder(AgentLookingForGroupPtr, ClientState.LocalContentId);
             if (!TryWaitFor<AddonMaster.LookingForGroupDetail>(out var groupDetail))
             {
-                ChatGui.PrintError("Failed to capture group detail window");
+                ChatGui.PrintError("Failed to capture group detail window", Plugin.NAMESPACE);
                 return;
             }
             groupDetail.JoinEdit();
             if (!TryWaitFor<AddonMaster.LookingForGroupCondition>(out var groupCondition))
             {
-                ChatGui.PrintError("Failed to capture group condition window");
+                ChatGui.PrintError("Failed to capture group condition window", Plugin.NAMESPACE);
                 return;
             };
             if (!TryRecruit(groupCondition))
             {
-                ChatGui.PrintError("Failed to click on recruit button");
+                ChatGui.PrintError("Failed to click on recruit button", Plugin.NAMESPACE);
                 return;
+            }
+            if (Config.Verbose)
+            {
+                ChatGui.Print(AgentLookingForGroupPtr->StoredRecruitmentInfo.CommentString, Plugin.NAMESPACE);
             }
         });
     }

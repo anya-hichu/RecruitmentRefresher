@@ -11,6 +11,8 @@ namespace RecruitmentRefresher;
 
 public sealed class Plugin : IDalamudPlugin
 {
+    public static readonly string NAMESPACE = "RecruitmentRefresher";
+
     [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
     [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
     [PluginService] internal static IClientState ClientState { get; private set; } = null!;
@@ -21,7 +23,7 @@ public sealed class Plugin : IDalamudPlugin
 
     public Config Config { get; init; }
 
-    public readonly WindowSystem WindowSystem = new("RecruitmentRefresher");
+    public readonly WindowSystem WindowSystem = new(NAMESPACE);
     private ConfigWindow ConfigWindow { get; init; }
 
     private RefreshCommand RefreshCommand { get; init; }

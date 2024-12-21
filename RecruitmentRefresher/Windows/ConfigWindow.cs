@@ -1,3 +1,4 @@
+using Dalamud.Interface.Components;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 
@@ -11,7 +12,7 @@ public class ConfigWindow : Window
     {
         SizeConstraints = new WindowSizeConstraints
         {
-            MinimumSize = new(360, 100),
+            MinimumSize = new(360, 120),
             MaximumSize = new(float.MaxValue, float.MaxValue)
         };
 
@@ -33,5 +34,13 @@ public class ConfigWindow : Window
             Config.RefreshRate = refreshRate;
             Config.Save();
         }
+
+        var verbose = Config.Verbose;
+        if (ImGui.Checkbox("Verbose###verbose", ref verbose))
+        {
+            Config.Verbose = verbose;
+            Config.Save();
+        }
+        ImGuiComponents.HelpMarker("Print recruitment comment when refreshing");
     }
 }
