@@ -7,9 +7,14 @@
     <PackageProjectUrl>https://github.com/anya-hichu/RecruitmentRefresher</PackageProjectUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <IsPackable>false</IsPackable>
+    <TargetFramework>net9.0-windows7.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="DalamudPackager" Version="12.0.0" />
   </ItemGroup>
 </Project>
