@@ -4,7 +4,6 @@ using Dalamud.Game.Command;
 using Dalamud.Plugin.Services;
 using ECommons;
 using ECommons.UIHelpers.AddonMasterImplementations;
-using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using System;
 using System.Runtime.InteropServices;

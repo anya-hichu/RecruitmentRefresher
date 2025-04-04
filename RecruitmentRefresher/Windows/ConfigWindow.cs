@@ -8,12 +8,12 @@ public class ConfigWindow : Window
 {
     private Config Config { get; init; }
 
-    public ConfigWindow(Config config) : base("Recruitment Refresher - Config###configWindow")
+    public ConfigWindow(Config config) : base("Recruitment Refresher - Config##configWindow")
     {
         SizeConstraints = new WindowSizeConstraints
         {
             MinimumSize = new(360, 120),
-            MaximumSize = new(float.MaxValue, float.MaxValue)
+            MaximumSize = new(360, 120)
         };
 
         Config = config;

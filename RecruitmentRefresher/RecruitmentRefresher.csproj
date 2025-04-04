@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="Dalamud.Plugin.Bootstrap.targets" />
-
+<Project Sdk="Dalamud.NET.SDK/12.0.0">
   <PropertyGroup>
     <Description>Refresh party finder recruitment automatically</Description>
     <PackageProjectUrl>https://github.com/anya-hichu/RecruitmentRefresher</PackageProjectUrl>
@@ -12,9 +10,5 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="DalamudPackager" Version="12.0.0" />
   </ItemGroup>
 </Project>
