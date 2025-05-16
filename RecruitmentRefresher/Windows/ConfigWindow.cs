@@ -41,6 +41,6 @@ public class ConfigWindow : Window
             Config.Verbose = verbose;
             Config.Save();
         }
-        ImGuiComponents.HelpMarker("Print recruitment comment when refreshing");
+        ImGuiComponents.HelpMarker("Display message when recruitment comment is reapplied (client clears it sometimes)");
     }
 }

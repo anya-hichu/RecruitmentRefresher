@@ -2,6 +2,7 @@ using Dalamud.Game;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Command;
 using Dalamud.Plugin.Services;
+using Dalamud.Utility;
 using ECommons;
 using ECommons.UIHelpers.AddonMasterImplementations;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
@@ -31,6 +32,7 @@ public unsafe class RefreshCommand : IDisposable
     private Config Config { get; init; }
     private OpenPartyFinderDelegate OpenPartyFinder { get; init; }
     private AgentLookingForGroup* AgentLookingForGroupPtr { get; init; }
+    private string? PreviousCommentString { get; set; }
 
     public RefreshCommand(IChatGui chatGui, IClientState clientState, ICommandManager commandManager, ICondition condition, Config config, ISigScanner sigScanner)
     {
@@ -56,6 +58,11 @@ public unsafe class RefreshCommand : IDisposable
         CommandManager.RemoveHandler(COMMAND_NAME);
     }
 
+    public void ResetState()
+    {
+        PreviousCommentString = null;
+    }
+
     private void OnCommand(string command, string args)
     {
         if (IsExecutable())
@@ -77,6 +84,21 @@ public unsafe class RefreshCommand : IDisposable
     {
         Task.Run(() =>
         {
+            // Workaround when recruitment comment is cleared out (seems to happen randomly)
+            var commentString = AgentLookingForGroupPtr->StoredRecruitmentInfo.CommentString;
+            if (PreviousCommentString != null && commentString != PreviousCommentString && commentString.IsNullOrWhitespace())
+            {
+                if (Config.Verbose)
+                {
+                    ChatGui.Print($"Comment was cleared out by client, reapplying '{PreviousCommentString}'", Plugin.NAMESPACE);
+                }
+                AgentLookingForGroupPtr->StoredRecruitmentInfo.CommentString = PreviousCommentString;
+            } 
+            else
+            {
+                PreviousCommentString = commentString;
+            }
+
             OpenPartyFinder(AgentLookingForGroupPtr, ClientState.LocalContentId);
             if (!TryWaitFor<AddonMaster.LookingForGroupDetail>(out var groupDetail))
             {
@@ -93,10 +115,6 @@ public unsafe class RefreshCommand : IDisposable
             {
                 ChatGui.PrintError("Failed to click on recruit button", Plugin.NAMESPACE);
                 return;
-            }
-            if (Config.Verbose)
-            {
-                ChatGui.Print(AgentLookingForGroupPtr->StoredRecruitmentInfo.CommentString, Plugin.NAMESPACE);
             }
         });
     }

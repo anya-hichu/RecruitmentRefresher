@@ -42,6 +42,10 @@ public class Refresher : IDisposable
         }
         else
         {
+            if (!RefreshCommand.IsExecutable())
+            {
+                RefreshCommand.ResetState();
+            }
             MinsElapsed = 0;
         }
     }
