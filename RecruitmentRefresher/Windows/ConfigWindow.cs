@@ -10,10 +10,10 @@ public class ConfigWindow : Window
 
     public ConfigWindow(Config config) : base("Recruitment Refresher - Config##configWindow")
     {
-        SizeConstraints = new WindowSizeConstraints
+        SizeConstraints = new()
         {
-            MinimumSize = new(360, 120),
-            MaximumSize = new(360, 120)
+            MinimumSize = new(360, 150),
+            MaximumSize = new(360, 150)
         };
 
         Config = config;
@@ -34,6 +34,14 @@ public class ConfigWindow : Window
             Config.RefreshRate = refreshRate;
             Config.Save();
         }
+
+        var maxRefresh = Config.MaxRefresh;
+        if (ImGui.InputInt("Max Refresh###maxRefresh", ref maxRefresh))
+        {
+            Config.MaxRefresh = maxRefresh;
+            Config.Save();
+        }
+        ImGuiComponents.HelpMarker("Disable auto-refresh after this number of auto-refresh is reached, use negative number to disable");
 
         var verbose = Config.Verbose;
         if (ImGui.Checkbox("Verbose###verbose", ref verbose))

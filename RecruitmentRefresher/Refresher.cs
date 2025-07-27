@@ -10,6 +10,7 @@ public class Refresher : IDisposable
     private IFramework Framework { get; init; }
     private RefreshCommand RefreshCommand { get; init; }
 
+    private int RefreshCount { get; set; } = 0;
     private double MinsElapsed { get; set; } = 0;
 
     public Refresher(Config config, IFramework framework, RefreshCommand refreshCommand)
@@ -32,7 +33,11 @@ public class Refresher : IDisposable
         {
             if (MinsElapsed >= Config.RefreshRate)
             {
-                RefreshCommand.ExecuteTask();
+                if (RefreshCount < Config.MaxRefresh)
+                {
+                    RefreshCommand.ExecuteTask();
+                    RefreshCount++;
+                }
                 MinsElapsed = 0;
             }
             else
@@ -46,6 +51,7 @@ public class Refresher : IDisposable
             {
                 RefreshCommand.ResetState();
             }
+            RefreshCount = 0;
             MinsElapsed = 0;
         }
     }
