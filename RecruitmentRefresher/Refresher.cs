@@ -33,7 +33,7 @@ public class Refresher : IDisposable
         {
             if (MinsElapsed >= Config.RefreshRate)
             {
-                if (RefreshCount < Config.MaxRefresh)
+                if (Config.MaxRefresh < 0 || RefreshCount < Config.MaxRefresh)
                 {
                     RefreshCommand.ExecuteTask();
                     RefreshCount++;
