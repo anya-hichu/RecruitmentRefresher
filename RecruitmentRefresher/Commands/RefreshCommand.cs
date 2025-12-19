@@ -1,4 +1,3 @@
-using Dalamud.Game;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Command;
 using Dalamud.Plugin.Services;
@@ -26,7 +25,7 @@ public unsafe class RefreshCommand : IDisposable
     private delegate void OpenPartyFinderDelegate(void* agentLfg, ulong contentId);
 
     private IChatGui ChatGui { get; init; }
-    private IClientState ClientState { get; init; }
+    private IPlayerState PlayerState { get; init; }
     private ICommandManager CommandManager { get; init; }
     private ICondition Condition { get; init; }
     private Config Config { get; init; }
@@ -34,10 +33,10 @@ public unsafe class RefreshCommand : IDisposable
     private AgentLookingForGroup* AgentLookingForGroupPtr { get; init; }
     private string? PreviousCommentString { get; set; }
 
-    public RefreshCommand(IChatGui chatGui, IClientState clientState, ICommandManager commandManager, ICondition condition, Config config, ISigScanner sigScanner)
+    public RefreshCommand(IChatGui chatGui, IPlayerState playerState, ICommandManager commandManager, ICondition condition, Config config, ISigScanner sigScanner)
     {
         ChatGui = chatGui;
-        ClientState = clientState;
+        PlayerState = playerState;
         CommandManager = commandManager;
         Condition = condition;
         Config = config;
@@ -99,7 +98,7 @@ public unsafe class RefreshCommand : IDisposable
                 PreviousCommentString = commentString;
             }
 
-            OpenPartyFinder(AgentLookingForGroupPtr, ClientState.LocalContentId);
+            OpenPartyFinder(AgentLookingForGroupPtr, PlayerState.ContentId);
             if (!TryWaitFor<AddonMaster.LookingForGroupDetail>(out var groupDetail))
             {
                 ChatGui.PrintError("Failed to capture group detail window", Plugin.NAMESPACE);

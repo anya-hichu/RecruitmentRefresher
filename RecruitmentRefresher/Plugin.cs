@@ -15,7 +15,7 @@ public sealed class Plugin : IDalamudPlugin
 
     [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
     [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
-    [PluginService] internal static IClientState ClientState { get; private set; } = null!;
+    [PluginService] internal static IPlayerState PlayerState { get; private set; } = null!;
     [PluginService] internal static ICondition Condition { get; private set; } = null!;
     [PluginService] internal static IFramework Framework { get; private set; } = null!;
     [PluginService] internal static IDalamudPluginInterface PluginInterface { get; private set; } = null!;
@@ -41,7 +41,7 @@ public sealed class Plugin : IDalamudPlugin
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUI;
         PluginInterface.UiBuilder.OpenMainUi += ToggleConfigUI;
 
-        RefreshCommand = new(ChatGui, ClientState, CommandManager, Condition, Config, SigScanner);
+        RefreshCommand = new(ChatGui, PlayerState, CommandManager, Condition, Config, SigScanner);
         Refresher = new(Config, Framework, RefreshCommand);
     }
 
